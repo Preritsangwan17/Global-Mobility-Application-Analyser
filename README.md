@@ -5,11 +5,14 @@
 # Global Mobility Application Analyser
 
 A command-line machine-learning baseline for **binary classification**, with reproducible training, held-out evaluation,
-model serialization and batch prediction. Previously an empty project scaffold; the repository now
-contains an implemented baseline and software tests.
+model serialization and batch prediction. The implementation handles mixed numeric/categorical inputs
+and produces an inspectable evaluation report when supplied with documented training data.
 
 **Status:** baseline implementation. No real-data model performance is claimed. A verified training
 dataset and dataset-specific evaluation are still required.
+
+
+[Quick start](#quick-start) · [Dataset contract](data/README.md) · [Model card](docs/MODEL_CARD.md) · [Verification](#verification) · [Contributing](CONTRIBUTING.md)
 
 ## What it does
 
@@ -20,7 +23,7 @@ Numeric and categorical preprocessing is fitted on training data only; unseen ca
 This is a conventional historical-case dataset contract, not verified source metadata. Adapt the
 explicit `TARGET`, `LABELS` and `DROP` constants to a different documented dataset before training.
 
-Both experiments use seed 42 and 60% training / 20% validation / 20% test partitions after deduplication.
+Training uses seed 42 and 60% training / 20% validation / 20% test partitions after deduplication.
 The selected model remains fitted on the training partition so the validation operating point remains
 consistent with evaluation. Training writes an artifact and an adjacent `.metrics.json` report.
 
@@ -41,7 +44,7 @@ Add the documented CSV locally, then run:
 
 ```bash
 python app.py train --data data/EasyVisa.csv
-python app.py predict --input data/new_records.csv --output artifacts/predictions.csv
+python app.py predict --input examples/cases.csv --output artifacts/predictions.csv
 ```
 
 The prediction CSV must contain the training feature columns; its target is optional.
