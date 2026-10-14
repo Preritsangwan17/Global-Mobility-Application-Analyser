@@ -1,0 +1,26 @@
+name: Bug report
+description: Report an executable problem with a reproducible example.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include the command and a small non-sensitive input example.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Python version and relevant package versions.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error output
+      description: Remove credentials and personal data before posting.

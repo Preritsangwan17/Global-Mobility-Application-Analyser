@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import hashlib
 from pathlib import Path
 import joblib
 import numpy as np
@@ -34,16 +35,18 @@ def prepare(frame, training=False):
     frame = frame.drop_duplicates().copy() if training else frame.copy()
     if frame.columns.duplicated().any():
         raise ValueError("Duplicate column names are not allowed")
+    if training:
+        for identifier in DROP:
+            if identifier in frame:
+                ids = frame[identifier].dropna()
+                if ids.duplicated().any():
+                    raise ValueError(
+                        f"Duplicate {identifier} records: resolve repeated entities before splitting"
+                    )
     frame = frame.drop(
         columns=[c for c in frame if c in DROP or c.startswith("Unnamed:")],
         errors="ignore",
     )
-    if "TotalCharges" in frame:
-        values = frame["TotalCharges"].astype(str).str.strip()
-        invalid = pd.to_numeric(values.mask(values.eq(""), np.nan), errors="coerce")
-        if (values.ne("") & invalid.isna()).any():
-            raise ValueError("TotalCharges must be numeric or blank")
-        frame["TotalCharges"] = invalid
     if training:
         if TARGET not in frame:
             raise ValueError(f"Missing target column: {TARGET}")
@@ -144,8 +147,26 @@ def train(data, output):
     threshold = float(thresholds[np.argmax(f1)])
     probability = model.predict_proba(test_X)[:, 1]
     prediction = (probability >= threshold).astype(int)
+    with Path(data).open("rb") as handle:
+        fingerprint = hashlib.file_digest(handle, "sha256").hexdigest()
     metrics = {
         "model": best,
+        "data_sha256": fingerprint,
+        "environment": {
+            "numpy": np.__version__,
+            "pandas": pd.__version__,
+            "scikit_learn": sklearn.__version__,
+        },
+        "features": X.columns.tolist(),
+        "feature_types": {
+            c: "numeric" if pd.api.types.is_numeric_dtype(X[c]) else "categorical"
+            for c in X
+        },
+        "positive_rate": {
+            "train": float(train_y.mean()),
+            "validation": float(val_y.mean()),
+            "test": float(test_y.mean()),
+        },
         "seed": 42,
         "validation_average_precision": scores,
         "threshold": threshold,
@@ -187,6 +208,14 @@ def predict(data, model_path, output):
     missing = set(saved["features"]) - set(X.columns)
     if missing:
         raise ValueError(f"Missing feature columns: {sorted(missing)}")
+    for column, kind in saved.get("metrics", {}).get("feature_types", {}).items():
+        if kind == "numeric":
+            X[column] = pd.to_numeric(X[column], errors="raise")
+    if (
+        not np.isfinite(float(saved["threshold"]))
+        or not 0 <= float(saved["threshold"]) <= 1
+    ):
+        raise ValueError("Saved model threshold must be between 0 and 1")
     probability = saved["model"].predict_proba(X[saved["features"]])[:, 1]
     inverse = {v: k for k, v in saved["labels"].items()}
     results = pd.read_csv(data)

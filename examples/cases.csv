@@ -1,0 +1,3 @@
+case_id,continent,education_of_employee,has_job_experience,requires_job_training,no_of_employees,yr_of_estab,region_of_employment,prevailing_wage,unit_of_wage,full_time_position
+EXAMPLE-001,Asia,Bachelor's,Y,N,100,2000,West,80000,Year,Y
+EXAMPLE-002,Europe,Master's,Y,N,500,2005,Northeast,95000,Year,Y

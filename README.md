@@ -81,3 +81,8 @@ scores or interval estimates where the application requires them.
 
 Code is covered by the existing [MIT license](LICENSE). Dataset terms are separate.
 Built by [Prerit Sangwan](https://github.com/Preritsangwan17), B.Tech CSE (AI/ML).
+
+## Model documentation
+
+See the [model card](docs/MODEL_CARD.md) for the intended use, input contract, evaluation method and limitations.
+For the recorded numerical environment, install `requirements-repro.txt` in a fresh virtual environment.

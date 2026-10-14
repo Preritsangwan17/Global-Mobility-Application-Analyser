@@ -1,0 +1,1 @@
+Fictional requests for the educational EasyVisa-style feature contract. No historical source or future approval outcome is implied. Use only with a model trained on the same verified feature semantics.
